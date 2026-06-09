@@ -4,6 +4,9 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 # Importation de tes fonctions de sécurité exclusives
 from security import verifier_mot_de_passe, connecter_utilisateur, hacher_mot_de_passe
+from annonces import init_routes_annonces
+
+init_routes_annonces(app, mysql)
 
 app = Flask(__name__)
 
