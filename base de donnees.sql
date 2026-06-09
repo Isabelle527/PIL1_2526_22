@@ -883,6 +883,20 @@ CREATE DATABASE IF NOT EXISTS `test` DEFAULT CHARACTER SET latin1 COLLATE latin1
 USE `test`;
 COMMIT;
 
+
+-- --------------------------------------------------------
+-- Structure de la table `messages` pour la messagerie backend
+-- --------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `expediteur_id` int(11) NOT NULL,
+  `destinataire_id` int(11) NOT NULL,
+  `contenu` text NOT NULL,
+  `date_envoi` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
