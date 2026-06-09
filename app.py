@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
-# Importation de tes fonctions de sécurité exclusives
+# Importation des fonctions de sécurité exclusives
 from security import verifier_mot_de_passe, connecter_utilisateur, hacher_mot_de_passe
 from annonces import init_routes_annonces
 
@@ -54,7 +54,7 @@ def login():
         
     return render_template('login.html')
 
-# --------------------------------------------------------
+# -------------------------------------------------------
 # ROUTE 2 : PAGE DE PROFIL (MON PROFIL)
 # --------------------------------------------------------
 @app.route('/profil', methods=['GET', 'POST'])
