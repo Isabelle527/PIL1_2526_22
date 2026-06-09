@@ -1,229 +1,246 @@
-from flask import Flask, request, jsonify
-import mysql.connector
+import os
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask_mysqldb import MySQL
+import MySQLdb.cursors
+# Importation de tes fonctions de sécurité exclusives
+from security import verifier_mot_de_passe, connecter_utilisateur, hacher_mot_de_passe
 
 app = Flask(__name__)
 
-# --- Configuration de la base de données ---
-db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',  
-    'database': 'ifri_mentorlink'  
-}
+# Clé secrète pour la gestion sécurisée des sessions Flask
+app.secret_key = 'ifri_mentorlink_secret_key_2026'
 
-# =====================================================================
-# --- 1. MOTEUR DE MATCHING HYBRIDE (Membre 5) ---
-# =====================================================================
+# --------------------------------------------------------
+# CONFIGURATION BASE DE DONNÉES (ifri_mentorlink)
+# --------------------------------------------------------
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'ifri_mentorlink'
 
-@app.route('/api/matching/<int:id_utilisateur>', methods=['GET'])
-def executer_matching(id_utilisateur):
-    try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
+mysql = MySQL(app)
+
+# --------------------------------------------------------
+# ROUTE 1 : PAGE DE CONNEXION (LOGIN)
+# --------------------------------------------------------
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password_saisi = request.form.get('password')
         
-        # Récupérer les lacunes du demandeur
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT id, nom, prenom, mot_de_passe, role FROM utilisateurs WHERE email = %s", (email,))
+        utilisateur = cursor.fetchone()
+        cursor.close()
+        
+        if utilisateur:
+            if verifier_mot_de_passe(utilisateur['mot_de_passe'], password_saisi):
+                connecter_utilisateur(
+                    session, 
+                    utilisateur['id'], 
+                    utilisateur['nom'], 
+                    utilisateur['prenom'], 
+                    utilisateur['role']
+                )
+                flash("Connexion réussie !", "success")
+                return redirect(url_for('profil'))
+            
+        flash("Adresse email ou mot de passe incorrect.", "danger")
+        
+    return render_template('login.html')
+
+# --------------------------------------------------------
+# ROUTE 2 : PAGE DE PROFIL (MON PROFIL)
+# --------------------------------------------------------
+@app.route('/profil', methods=['GET', 'POST'])
+def profil():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    user_id = session['user_id']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    if request.method == 'POST':
+        nom = request.form.get('nom')
+        prenom = request.form.get('prenom')
+        telephone = request.form.get('telephone')
+        filiere = request.form.get('filiere') # Ex: Génie Logiciel, Internet des Objets...
+        niveau = request.form.get('niveau')
+        competences = request.form.get('competences') # Séparées par des virgules
+        bio = request.form.get('bio')
+        
         cursor.execute("""
-            SELECT c.nom_de_competence 
-            FROM POSSEDER p
-            JOIN COMPETENCE c ON p.id_Competence = c.Id_competence
-            WHERE p.Id_Utilisateurs = %s AND p.type_relation = 'Mentore'
-        """, (id_utilisateur,))
-        lacunes = [row['nom_de_competence'].lower() for row in cursor.fetchall()]
+            UPDATE utilisateurs 
+            SET nom = %s, prenom = %s, telephone = %s, filiere = %s, niveau = %s, competences = %s, bio = %s
+            WHERE id = %s
+        """, (nom, prenom, telephone, filiere, niveau, competences, bio, user_id))
         
-        if not lacunes:
-            cursor.close()
-            conn.close()
-            return jsonify({"message": "Aucune lacune enregistrée pour cet utilisateur."}), 404
+        mysql.connection.commit()
+        session['prenom'] = prenom
+        flash("Votre profil a été mis à jour avec succès !", "success")
+
+    cursor.execute("SELECT nom, prenom, email, telephone, filiere, niveau, competences, bio FROM utilisateurs WHERE id = %s", (user_id,))
+    infos_user = cursor.fetchone()
+    cursor.close()
+    
+    return render_template('profil.html', user=infos_user)
+
+# --------------------------------------------------------
+# ROUTE 3 : ALGORITHME DE MATCHING (MENTORS / ÉTUDIANTS)
+# --------------------------------------------------------
+@app.route('/matching')
+def matching():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    user_id = session['user_id']
+    user_role = session.get('role')
+    
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    # 1. Récupérer les filières et compétences de l'utilisateur connecté
+    cursor.execute("SELECT id, filiere, competences FROM utilisateurs WHERE id = %s", (user_id,))
+    moi = cursor.fetchone()
+    
+    # 2. Déterminer le rôle ciblé pour le matching
+    # Si je suis étudiant, je cherche un mentor. Si je suis mentor, je cherche des étudiants.
+    cible_role = 'mentor' if user_role == 'etudiant' else 'etudiant'
+    
+    cursor.execute("SELECT id, nom, prenom, email, filiere, niveau, competences, bio FROM utilisateurs WHERE role = %s", (cible_role,))
+    utilisateurs_cibles = cursor.fetchall()
+    cursor.close()
+    
+    suggestions = []
+    
+    # 3. Calcul du score de matching
+    for cible in utilisateurs_cibles:
+        score = 0
+        
+        # Comparaison de la filière (Poids fort : 50 points)
+        if moi['filiere'] and cible['filiere']:
+            if moi['filiere'].strip().lower() == cible['filiere'].strip().lower():
+                score += 50
+                
+        # Comparaison des compétences textuelles (Poids dynamique : 10 points par mot-clé commun)
+        if moi['competences'] and cible['competences']:
+            mes_comp = set([c.strip().lower() for c in moi['competences'].split(',') if c.strip()])
+            ses_comp = set([c.strip().lower() for c in cible['competences'].split(',') if c.strip()])
+            communes = mes_comp.intersection(ses_comp)
+            score += len(communes) * 10
             
-        # Trouver tous les mentors possédant ces matières
+        # On n'ajoute que si un intérêt ou point commun minimal existe
+        if score > 0:
+            cible['score_match'] = score
+            suggestions.append(cible)
+            
+    # Trier du score le plus fort au plus faible
+    suggestions.sort(key=lambda x: x['score_match'], reverse=True)
+    
+    return render_template('matching.html', suggestions=suggestions)
+
+# --------------------------------------------------------
+# ROUTE 4 : SYSTÈME DE MESSAGERIE (DISCUSSIONS)
+# --------------------------------------------------------
+@app.route('/messagerie', methods=['GET', 'POST'])
+@app.route('/messagerie/<int:destinataire_id>', methods=['GET', 'POST'])
+def messagerie(destinataire_id=None):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    user_id = session['user_id']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    # Traitement de l'envoi d'un message (Frontend par formulaire ou AJAX)
+    if request.method == 'POST' and destinataire_id:
+        contenu = request.form.get('message')
+        if contenu and contenu.strip() != "":
+            cursor.execute("""
+                INSERT INTO messages (expediteur_id, destinataire_id, contenu) 
+                VALUES (%s, %s, %s)
+            """, (user_id, destinataire_id, contenu.strip()))
+            mysql.connection.commit()
+            
+            # Si c'est une requête AJAX, renvoyer du JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"status": "sent", "message": contenu})
+                
+            return redirect(url_for('messagerie', destinataire_id=destinataire_id))
+
+    # 1. Récupérer la liste des utilisateurs avec qui on a discuté ou peut discuter
+    cursor.execute("""
+        SELECT DISTINCT id, nom, prenom, role 
+        FROM utilisateurs 
+        WHERE id != %s
+    """, (user_id,))
+    contacts = cursor.fetchall()
+    
+    # 2. Récupérer l'historique des messages si un contact est sélectionné
+    conversations = []
+    contact_actuel = None
+    if destinataire_id:
+        cursor.execute("SELECT id, nom, prenom FROM utilisateurs WHERE id = %s", (destinataire_id,))
+        contact_actuel = cursor.fetchone()
+        
         cursor.execute("""
-            SELECT u.Id_Utilisateurs as mentor_id, u.nom, u.prenom, u.email, u.filiere,
-                   c.nom_de_competence, p.note
-            FROM POSSEDER p
-            JOIN UTILISATEUR u ON p.Id_Utilisateurs = u.Id_Utilisateurs
-            JOIN COMPETENCE c ON p.id_Competence = c.Id_competence
-            WHERE p.Id_Utilisateurs != %s AND p.type_relation = 'Mentor'
-        """, (id_utilisateur,))
-        toutes_offres = cursor.fetchall()
+            SELECT expediteur_id, destinataire_id, contenu, date_envoi 
+            FROM messages 
+            WHERE (expediteur_id = %s AND destinataire_id = %s) 
+               OR (expediteur_id = %s AND destinataire_id = %s)
+            ORDER BY date_envoi ASC
+        """, (user_id, destinataire_id, destinataire_id, user_id))
+        conversations = cursor.fetchall()
         
-        profils_mentors = {}
-        for offre in toutes_offres:
-            m_id = offre['mentor_id']
-            if m_id not in profils_mentors:
-                profils_mentors[m_id] = {
-                    "mentor_id": m_id, "nom": offre['nom'], "prenom": offre['prenom'],
-                    "email": offre['email'], "filiere": offre['filiere'], "competences": {}
-                }
-            profils_mentors[m_id]["competences"][offre['nom_de_competence'].lower()] = offre['note']
-            
-        liste_suggestions = []
-        for m_id, mentor in profils_mentors.items():
-            matieres_communes = [lacune for lacune in lacunes if lacune in mentor["competences"]]
-            
-            if matieres_communes:
-                total_notes = sum(mentor["competences"][mat] for mat in matieres_communes)
-                taux_couverture = len(matieres_communes) / len(lacunes)
-                moyenne_note = total_notes / len(matieres_communes)
-                
-                score_final = round(taux_couverture * (moyenne_note / 10) * 100, 2)
-                
-                liste_suggestions.append({
-                    "mentor_id": mentor["mentor_id"],
-                    "nom": mentor["nom"],
-                    "prenom": mentor["prenom"],
-                    "email": mentor["email"],
-                    "filiere": mentor["filiere"],
-                    "matieres_partagees": ", ".join(matieres_communes),
-                    "score": f"{score_final}%"
-                })
-                
-        liste_suggestions = sorted(liste_suggestions, key=lambda x: float(x['score'].replace('%', '')), reverse=True)
+    cursor.close()
+    return render_template('messagerie.html', contacts=contacts, conversations=conversations, contact_actuel=contact_actuel)
+
+# --------------------------------------------------------
+# ROUTE 5 : INTERFACE D'API POUR LES DISPONIBILITÉS DU CALENDRIER
+# --------------------------------------------------------
+@app.route('/api/disponibilites', methods=['GET', 'POST'])
+def gerer_disponibilites():
+    if 'user_id' not in session:
+        return jsonify({"error": "Non autorisé"}), 401
         
-        cursor.close()
-        conn.close()
-        return jsonify({"suggestions_mentors": liste_suggestions}), 200
-    except Exception as e:
-        return jsonify({"error": f"Erreur technique : {str(e)}"}), 500
-
-
-# =====================================================================
-# --- 2. AUTHENTIFICATION & COMPTE  ---
-# =====================================================================
-
-@app.route('/api/auth/register', methods=['POST'])
-def inscription():
-    data = request.json
-    nom = data.get('nom')
-    prenom = data.get('prenom')
-    email = data.get('email')
-    mot_de_passe = data.get('mot_de_passe')
-    telephone = data.get('telephone')
-    filiere = data.get('filiere')
-    statut_mentorat = data.get('statut_mentorat', 'Les deux')
-
-    if not all([nom, prenom, email, mot_de_passe, telephone, filiere]):
-        return jsonify({"error": "Champs obligatoires manquants"}), 400
-
-    try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("SELECT Id_Utilisateurs FROM UTILISATEUR WHERE email = %s", (email,))
-        if cursor.fetchone():
-            return jsonify({"error": "Cet email existe déjà"}), 400
-
-        requete = """
-            INSERT INTO UTILISATEUR (nom, prenom, email, mot_de_passe, telephone, filiere, statut_mentorat)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(requete, (nom, prenom, email, mot_de_passe, telephone, filiere, statut_mentorat))
-        conn.commit()
-
-        cursor.close()
-        conn.close()
-        return jsonify({"message": "Utilisateur créé avec succès !"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# =====================================================================
-# --- 3. GESTION DES SLIDERS / CONFIGURATION DE PROFIL ---
-# =====================================================================
-
-@app.route('/api/profil/<int:id_utilisateur>/competences', methods=['POST'])
-def attribuer_note_competence(id_utilisateur):
-    data = request.json
-    id_competence = data.get('id_competence')
-    type_relation = data.get('type_relation')
-    note = data.get('note', 5)
-
-    if not id_competence or not type_relation:
-        return jsonify({"error": "id_competence et type_relation requis"}), 400
-
-    try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
-
-        requete = """
-            INSERT INTO POSSEDER (Id_Utilisateurs, id_Competence, type_relation, note)
-            VALUES (%s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE type_relation = VALUES(type_relation), note = VALUES(note)
-        """
-        cursor.execute(requete, (id_utilisateur, id_competence, type_relation, note))
-        conn.commit()
-
-        cursor.close()
-        conn.close()
-        return jsonify({"message": "Configuration du curseur sauvegardée !"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# =====================================================================
-# --- 4. MESSAGERIE CONFORME AUX TABLES DE LIAISON  ---
-# =====================================================================
-
-@app.route('/api/messages/send', methods=['POST'])
-def envoyer_message():
-    data = request.json
-    id_expediteur = data.get('id_expediteur')
-    id_destinataire = data.get('id_destinataire')
-    contenu = data.get('contenu')
-
-    if not all([id_expediteur, id_destinataire, contenu]):
-        return jsonify({"error": "Données de message incomplètes"}), 400
-
-    try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
-
-        # 1. Insertion dans la table MESSAGE
-        cursor.execute("INSERT INTO MESSAGE (contenu) VALUES (%s)", (contenu,))
-        id_message = cursor.lastrowid
-
-        # 2. Liaisons dans les tables pivots ENVOYER et RECEVOIR 
-        cursor.execute("INSERT INTO ENVOYER (Id_Utilisateurs, Id_message) VALUES (%s, %s)", (id_expediteur, id_message))
-        cursor.execute("INSERT INTO RECEVOIR (Id_Utilisateurs, Id_message) VALUES (%s, %s)", (id_destinataire, id_message))
+    user_id = session['user_id']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    if request.method == 'POST':
+        donnees_dispo = request.get_json()
+        cursor.execute("DELETE FROM disponibilites WHERE utilisateur_id = %s", (user_id,))
         
-        conn.commit()
+        for date_jour, tranches in donnees_dispo.items():
+            for tranche in tranches:
+                cursor.execute("""
+                    INSERT INTO disponibilites (utilisateur_id, date_jour, tranche_horaire)
+                    VALUES (%s, %s, %s)
+                """, (user_id, date_jour, tranche))
+                
+        mysql.connection.commit()
         cursor.close()
-        conn.close()
-        return jsonify({"message": "Message envoyé avec succès !"}), 201
-    except Exception as e:
-        return jsonify({"error": f"Erreur de messagerie : {str(e)}"}), 500
+        return jsonify({"status": "success", "message": "Disponibilités synchronisées !"})
 
+    cursor.execute("SELECT date_jour, tranche_horaire FROM disponibilites WHERE utilisateur_id = %s", (user_id,))
+    lignes = cursor.fetchall()
+    cursor.close()
+    
+    structure_json = {}
+    for ligne in lignes:
+        date_str = str(ligne['date_jour'])
+        if date_str not in structure_json:
+            structure_json[date_str] = []
+        structure_json[date_str].append(ligne['tranche_horaire'])
+        
+    return jsonify(structure_json)
 
-@app.route('/api/messages/history', methods=['GET'])
-def historique_messages():
-    user1 = request.args.get('user1')
-    user2 = request.args.get('user2')
-
-    if not user1 or not user2:
-        return jsonify({"error": "Paramètres user1 et user2 manquants"}), 400
-
-    try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
-
-        # Extraction via jointures des tables pivots ENVOYER (e) et RECEVOIR (r)
-        requete = """
-            SELECT m.Id_message, m.contenu, m.date_envoi, e.Id_Utilisateurs as expediteur_id
-            FROM MESSAGE m
-            JOIN ENVOYER e ON m.Id_message = e.Id_message
-            JOIN RECEVOIR r ON m.Id_message = r.Id_message
-            WHERE (e.Id_Utilisateurs = %s AND r.Id_Utilisateurs = %s)
-               OR (e.Id_Utilisateurs = %s AND r.Id_Utilisateurs = %s)
-            ORDER BY m.date_envoi ASC
-        """
-        cursor.execute(requete, (user1, user2, user2, user1))
-        historique = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-        return jsonify({"historique": historique}), 200
-    except Exception as e:
-        return jsonify({"error": f"Erreur d'historique : {str(e)}"}), 500
-
+# --------------------------------------------------------
+# ROUTE 6 : DÉCONNEXION
+# --------------------------------------------------------
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
