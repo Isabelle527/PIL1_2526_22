@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport de Projet – Groupe 22 – MentorLink</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            color: #2c2c2c;
+            background-color: #fff;
+            padding: 40px 80px;
+            line-height: 1.7;
+        }
+
+        /* ── En-tête ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #737271;
+            padding-bottom: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img { width: 50px; }
+
+        .titre-rapport {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .titre-rapport h1 {
+            font-size: 24px;
+            color: #050505;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .titre-rapport .subtitle {
+            font-size: 14px;
+            color: #777;
+            margin-top: 8px;
+        }
+
+        /* ── Sections ── */
+        section { margin-bottom: 3%; }
+
+        h2 {
+            font-size: 18px;
+            color: #0f0f0f;
+            border-left: 4px solid #e67e22;
+            padding-left: 10px;
+            margin-bottom: 14px;
+            margin-top: 30px;
+        }
+
+        h3 {
+            font-size: 15px;
+            color: #2c2c2c;
+            margin-bottom: 8px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+
+        ol, ul {
+            padding-left: 24px;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        li { margin-bottom: 4px; }
+
+        b { color: #c0392b; }
+
+        code {
+            font-family: monospace;
+            font-size: 13px;
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .note {
+            font-size: 13px;
+            color: #888;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #777;
+            border-top: 1px solid #eee;
+            margin-top: 40px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">
+            <img src="Rapport%20de%20Projet%20%E2%80%93%20Groupe%2022%20%E2%80%93%20MentorLink_files/logoifri.png" alt="IFRI">
+            <img src="Rapport%20de%20Projet%20%E2%80%93%20Groupe%2022%20%E2%80%93%20MentorLink_files/logouac.png" alt="UAC">
+        </div>
+        <p>Année académique 2025–2026</p>
+    </div>
+
+    <div class="titre-rapport">
+        <h1>Université d'Abomey-Calavi</h1>
+        <h1>Rapport de Projet – Groupe 22</h1>
+        <h1>Projet MentorLink</h1>
+        <p class="subtitle">Institut de Formation et de Recherche en Informatique (IFRI)</p>
+    </div>
+
+
+   
+    <section>
+        <h2>1. Membres du Groupe</h2>
+            <ol>
+                <li>AUDIAKHAS Trésor Mario</li>
+                <li>GNANSOUNOU Enoch</li>
+                <li> HOUNPKATIN Kemiel</li>
+                <li>COCOUVI Précieuse</li>
+                <li>TCHENGA Osias</li>
+                <li>OJDO Cica Cherifath Laura</li>
+            </ol>
+        <p class="note">Note : M. Hilarion n'a participé à aucune des 
+tâches réalisées et a notifié son départ du groupe. Le projet a donc été
+ mené à bien par six membres.</p>
+    </section>
+
+
+   
+    <section>
+        <h2>2. Mode de Fonctionnement Interne</h2>
+
+        <p>Le groupe 22 est constitué de sept membres. Compte tenu de la
+ compréhension encore limitée de la majorité des membres concernant 
+certaines notions nécessaires à la réalisation du projet, nous avons 
+dans un premier temps consacré du temps à la documentation et à 
+l'apprentissage des outils et technologies indispensables à la mise en 
+œuvre de notre application web.</p>
+
+        <p>À l'issue de cette phase de préparation, nous nous sommes 
+réunis afin d'organiser le travail et de répartir les différentes 
+tâches. Pour optimiser l'avancement du projet, nous avons choisi de 
+constituer deux équipes distinctes :</p>
+        <ul>
+            <li><b>Équipe 1</b> – Conception et développement des interfaces utilisateur ainsi que conception de la base de données.</li>
+            <li><b>Équipe 2</b> – Mise en place de l'architecture du projet et configuration de Django, dirigée par Mme Cherifath.</li>
+        </ul>
+
+        <p>Malheureusement, la participation de tous les membres n'a pas
+ été effective tout au long du projet. En particulier, M. Hilarion n'a 
+pris part à aucune des tâches réalisées, ce qui a conduit le reste du 
+groupe à poursuivre le projet à six membres.</p>
+
+        <p>Après la phase de répartition des tâches, chaque équipe a 
+travaillé sur les missions qui lui avaient été confiées. Une fois les 
+premières réalisations terminées, les travaux ont été mis en commun afin
+ de procéder à leur intégration. L'absence de maquette détaillée a 
+parfois entraîné certaines divergences concernant l'apparence et 
+l'organisation des interfaces. Toutefois, ces difficultés ont été 
+résolues grâce à des échanges réguliers entre les membres du groupe.</p>
+
+        <p>Les pages conçues par l'équipe chargée de l'interface ont 
+ensuite été transmises à l'équipe responsable de la structure du projet 
+afin d'être intégrées à l'architecture Django. Après cette étape 
+d'intégration, l'ensemble du groupe s'est concentré sur l'implémentation
+ des fonctionnalités prévues dans le cahier des charges.</p>
+
+        <p>Tout au long du projet, les échanges se sont essentiellement 
+effectués à travers des discussions en ligne. L'utilisation de GitHub a 
+posé des difficultés à certains membres de l'équipe, ce qui a affecté la
+ régularité des commits. M. Enoch, disposant d'une plus grande aisance 
+avec Git et GitHub, s'est donc principalement chargé de la gestion des 
+commits et de la mise à jour du dépôt au nom du groupe.</p>
+
+        <p>Malgré les difficultés rencontrées, notamment liées à 
+l'apprentissage des technologies utilisées et à la coordination des 
+contributions, le groupe est parvenu à collaborer efficacement afin de 
+mener à bien la réalisation du projet.</p>
+    </section>
+
+    <section>
+        <h2>3. Conception du Projet</h2>
+
+        <h3>3.1 Présentation générale</h3>
+        <p>MentorLink est une plateforme web développée avec le 
+framework Django permettant la mise en relation entre mentors et 
+mentorés. L'application offre la gestion des comptes utilisateurs, la 
+recherche de profils, la publication de contenus, ainsi qu'un système de
+ messagerie interne.</p>
+
+        <h3>3.2 Structure générale des fichiers Python</h3>
+        <p>L'architecture Django du projet MentorLink est structurée autour de fichiers Python clés répartis dans les modules principaux :</p>
+
+        <h3>Fichiers de configuration de base</h3>
+        <pre>manage.py              # Point d'entrée principal pour exécuter les commandes Django
+populate_db.py         # Script Python d'injection de données initiales dans la base
+apply_migrations.py    # Script d'application automatisée des migrations
+fix_and_migrate.py     # Script de résolution des conflits et de migration
+run_migration.py       # Script d'exécution des fichiers de migration de l'application</pre>
+
+        <h3>Fichiers Python du module « config »</h3>
+        <p>
+config/settings.py     # Configuration centrale du projet (applications, base de données, middlewares)
+config/urls.py         # Registre et aiguillage des routes URL principales du projet
+config/wsgi.py         # Point d'entrée pour les serveurs web compatibles WSGI
+config/asgi.py         # Point d'entrée pour les serveurs web asynchrones compatibles ASGI</p>
+
+        <h3>3.3 Application « comptes »</h3>
+        <p>Ce module gère les utilisateurs, leurs profils ainsi que les annonces de mentorat :</p>
+        <ul>
+            <li>comptes/models.py : Définit la structure des tables via les modèles Profile et MentoratPost.</li>
+            <li>comptes/views.py : Contient la logique métier pour l'inscription, l'authentification, la recherche et le tableau de bord.</li>
+            <li>comptes/urls.py: Gère le routage des requêtes HTTP spécifiques à la gestion des comptes.</li>
+            <li>comptes/forms.py: Formulaires sécurisés pour la saisie et la modification des profils.</li>
+            <li>comptes/admin.py : Déclaration et configuration des modèles dans l'interface d'administration Django.</li>
+        </ul>
+
+        <h3>3.4 Application « messageries »</h3>
+        <p>Ce module assure la communication interne et les échanges sécurisés entre les utilisateurs :</p>
+        <ul>
+            <li><code>messageries/models.py: Structure des tables via les modèles Conversation,Message et ContactMessage.</code></li><code>
+            <li><code>messageries/views.py : Implémente la logique d'envoi de messages, de création de salons et de suivi des historiques.</code></li><code>
+            <li><code>messageries/urls.py : Cartographie les chemins d'accès pour l'accès aux boîtes de réception et fils de discussion.</code></li><code>
+        </code></code></code></ul><code><code><code>
+
+        <h3>3.5 Architecture MVT</h3>
+        <p>Le projet MentorLink respecte scrupuleusement l'architecture 
+MVT (Model-View-Template) imposée par Django. La répartition des 
+responsabilités à travers ces différents fichiers Python garantit une 
+maintenance simplifiée, une lisibilité accrue du code source et une 
+excellente évolutivité pour les futurs modules de la plateforme.</p>
+    </code></code></code></section><code><code><code>
+    
+    <section>
+        <h2>4. Instructions de Déploiement</h2>
+
+        <h3>Prérequis</h3>
+        <p>Avant de lancer l'application, assurez-vous d'avoir installé :</p>
+        <ul>
+            <li>Python 3.10 ou une version plus récente</li>
+            <li>pip3 (gestionnaire de paquets Python)</li>
+            <li>Git</li>
+            <li>Un navigateur web moderne</li>
+        </ul>
+
+        <h3>Vérification de Python</h3>
+        <p>Sous Linux :</p>
+        <pre><code>python3 --version</code></pre>
+        <p>Sous Windows :</p>
+        <pre><code>python --version</code></pre>
+        <p>Si Python n'est pas installé, téléchargez-le depuis : <a href="https://www.python.org/downloads/">https://www.python.org/downloads/</a></p>
+
+        <h3>Vérification et installation de pip3</h3>
+        <pre><code>pip3 --version</code></pre>
+        <p>Si pip3 n'est pas installé (Linux) :</p>
+        <pre><code>sudo apt update
+sudo apt install python3-pip</code></pre>
+        <p>Sous Windows, pip est inclus avec Python. Pour le mettre à jour :</p>
+        <pre><code>python -m pip install --upgrade pip</code></pre>
+
+        <h3>Vérification de Git</h3>
+        <pre><code>git --version</code></pre>
+        <p>Si Git n'est pas installé (Linux) :</p>
+        <pre><code>sudo apt install git</code></pre>
+        <p>Sous Windows : <a href="https://git-scm.com/downloads">https://git-scm.com/downloads</a></p>
+
+        <h3>Installation du module venv (Linux uniquement)</h3>
+        <pre><code>sudo apt install python3-venv</code></pre>
+
+        <h3>Récupération du projet</h3>
+        <pre><code>git clone https://github.com/Isabelle527/PIL1_2526_22.git
+cd PIL1_2526_22</code></pre>
+
+        <h3>Création et activation de l'environnement virtuel</h3>
+        <p>Sous Linux :</p>
+        <pre><code>python3 -m venv venv
+source venv/bin/activate</code></pre>
+        <p>Sous Windows :</p>
+        <pre><code>python -m venv venv
+venv\Scripts\activate</code></pre>
+        <p>Une fois activé, le terminal affiche <code>(venv)</code> en début de ligne.</p>
+
+        <h3>Installation des dépendances</h3>
+        <pre><code>pip install -r requirements.txt</code></pre>
+        <p>Ou avec pip3 si nécessaire :</p>
+        <pre><code>pip3 install -r requirements.txt</code></pre>
+
+        <h3>Configuration des variables d'environnement</h3>
+        <p>Si le projet contient un fichier <code>.env.example</code>, le copier :</p>
+        <pre><code>cp .env.example .env</code></pre>
+        <p>Puis éditer <code>.env</code> pour y renseigner les valeurs propres à votre environnement (clé secrète, base de données, etc.).</p>
+
+        <h3>Initialisation de la base de données</h3>
+        <pre><code>python manage.py migrate</code></pre>
+        <p>Ou sous Linux :</p>
+        <pre><code>python3 manage.py migrate</code></pre>
+
+        <h3>Chargement des données initiales (optionnel)</h3>
+        <pre><code>python manage.py loaddata nom_du_fichier.json</code></pre>
+
+        <h3>Collecte des fichiers statiques (optionnel)</h3>
+        <pre><code>python manage.py collectstatic</code></pre>
+
+        <h3>Création d'un compte administrateur (optionnel)</h3>
+        <pre><code>python manage.py createsuperuser</code></pre>
+        <p>Suivre les instructions pour définir un nom d'utilisateur, une adresse e-mail et un mot de passe.</p>
+
+        <h3>Lancement de l'application</h3>
+        <pre><code>python manage.py runserver</code></pre>
+        <p>Ouvrir l'adresse suivante dans un navigateur :</p>
+        <pre><code>http://127.0.0.1:8000/</code></pre>
+        <p>L'interface d'administration est accessible à :</p>
+        <pre><code>http://127.0.0.1:8000/admin/</code></pre>
+
+        <h3>Arrêt du serveur</h3>
+        <pre><code>Ctrl + C</code></pre>
+
+        <h3>Mise à jour du projet</h3>
+        <pre><code>git pull origin main
+python manage.py migrate</code></pre>
+    </section>
+
+    <section>
+        <h2>5. Manuel d'Utilisation</h2>
+
+        <h3>5.1 Accès à la plateforme</h3>
+        <p>Une fois le serveur lancé, ouvrez un navigateur et accédez à http://127.0.0.1:8000/. La page d'accueil de MentorLink s'affiche.</p>
+
+        <h3>5.2 Création d'un compte</h3>
+        <ol>
+            <li>Cliquez sur le bouton <b>S'inscrire</b> depuis la page d'accueil.</li>
+            <li>Remplissez le formulaire d'inscription (nom d'utilisateur, adresse e-mail, mot de passe).</li>
+            <li>Validez en cliquant sur <b>Créer mon compte</b>.</li>
+            <li>Vous êtes redirigé vers votre tableau de bord personnel.</li>
+        </ol>
+
+        <h3>5.3 Connexion</h3>
+        <ol>
+            <li>Cliquez sur <b>Se connecter</b>.</li>
+            <li>Saisissez votre nom d'utilisateur et votre mot de passe.</li>
+            <li>Cliquez sur <b>Connexion</b> pour accéder à votre espace.</li>
+        </ol>
+
+        <h3>5.4 Compléter son profil</h3>
+        <ol>
+            <li>Accédez à la section <b>Mon profil</b> depuis le menu de navigation.</li>
+            <li>Renseignez vos informations : compétences, domaines d'expertise, disponibilités.</li>
+            <li>Précisez votre rôle : <b>Mentor</b> (vous souhaitez partager vos connaissances) ou <b>Mentoré</b> (vous recherchez un accompagnement).</li>
+            <li>Enregistrez les modifications.</li>
+        </ol>
+
+        <h3>5.5 Recherche de profils</h3>
+        <ol>
+            <li>Utilisez la barre de recherche ou accédez à la section <b>Explorer</b>.</li>
+            <li>Filtrez les résultats par domaine, compétence ou rôle (mentor / mentoré).</li>
+            <li>Consultez les profils qui correspondent à votre recherche.</li>
+        </ol>
+
+        <h3>5.6 Messagerie interne</h3>
+        <ol>
+            <li>Depuis le profil d'un utilisateur, cliquez sur <b>Envoyer un message</b>.</li>
+            <li>Une conversation est créée et accessible depuis la section <b>Messagerie</b>.</li>
+            <li>Répondez aux messages reçus directement dans le fil de discussion.</li>
+        </ol>
+
+        <h3>5.7 Publication d'annonces de mentorat</h3>
+        <ol>
+            <li>Accédez à la section <b>Mes annonces</b>.</li>
+            <li>Cliquez sur <b>Nouvelle annonce</b> et décrivez votre offre ou demande de mentorat.</li>
+            <li>Publiez l'annonce pour qu'elle soit visible par les autres utilisateurs.</li>
+        </ol>
+
+        <h3>5.8 Interface d'administration</h3>
+        <p>Réservée au super-utilisateur créé lors du déploiement, l'interface d'administration est accessible à :</p>
+        <p>http://127.0.0.1:8000/admin/</p>
+        <p>Elle permet de gérer l'ensemble des utilisateurs, profils, annonces et messages de la plateforme.</p>
+
+        <h3>5.9 Déconnexion</h3>
+        <p>Cliquez sur <b>Se déconnecter</b> depuis le menu de navigation pour mettre fin à votre session.</p>
+    </section>
+
+
+    <footer>
+        Rapport académique – Projet MentorLink – Groupe 22 © 2026
+    </footer>
+
+
+
+</code></code></code></body></html>
