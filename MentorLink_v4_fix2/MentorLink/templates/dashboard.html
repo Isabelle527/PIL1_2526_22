@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% block title %}Tableau de bord | IFRI MentorLink{% endblock %}
+{% block content %}
+<section class='dashboard-section'>
+    <div class='dashboard-header'>
+        <div>
+            <p class='eyebrow'>Tableau de bord</p>
+            <h1>Suivez votre progression, vos rencontres et vos recommandations IFRI.</h1>
+            <p class='text-muted'>Une vue claire de votre profil, de vos mentors recommandés et des annonces compatibles.</p>
+        </div>
+        <div class='dashboard-actions'>
+            <a href='{% url "profile" %}' class='btn btn-outline-secondary'>Voir mon profil</a>
+            <a href='{% url "publier" %}' class='btn btn-primary'>Publier une annonce</a>
+        </div>
+    </div>
+
+    <div class='dashboard-summary'>
+        <div class='metric-card'>
+            <h3>{{ posts|length }}</h3>
+            <p>Annonces publiées</p>
+        </div>
+        <div class='metric-card'>
+            <h3>{{ recommended_mentors|length }}</h3>
+            <p>Mentors recommandés</p>
+        </div>
+        <div class='metric-card'>
+            <h3>{{ conversations|length }}</h3>
+            <p>Conversations actives</p>
+        </div>
+    </div>
+
+    <div class='row g-4'>
+        <div class='col-xl-8'>
+            <div class='row g-4'>
+                <div class='col-lg-6'>
+                    <div class='card p-4'>
+                        <div class='d-flex align-items-center gap-3 mb-3'>
+                            <div class='mentor-anonymous-avatar large'>{{ profile.user.username|slice:":1"|upper }}</div>
+                            <div>
+                                <h4 class='mb-0'>{{ profile.user.username }}</h4>
+                                <p class='small text-muted mb-0'>{{ profile.get_role_display }} • {{ profile.filiere }}</p>
+                            </div>
+                        </div>
+                        <p><strong>Disponibilités :</strong> {{ profile.disponibilites|default:'Non renseignées' }}</p>
+                        <p><strong>Compétences :</strong> {{ profile.competences|default:'Non renseignées' }}</p>
+                        <a href='{% url "edit_profile" %}' class='btn btn-outline-primary w-100 mt-3'>Modifier mon profil</a>
+                    </div>
+                </div>
+                <div class='col-lg-6'>
+                    <div class='card p-4'>
+                        <h4>Objectif du moment</h4>
+                        <p class='text-muted'>Restez concentré sur vos sessions, vos messages et votre développement professionnel.</p>
+                        <div class='metric-row'>
+                            <div class='metric-item'>
+                                <strong>{{ recommended_posts|length }}</strong>
+                                Annonces compatibles
+                            </div>
+                            <div class='metric-item'>
+                                <strong>{{ conversations|length }}</strong>
+                                Conversations ouvertes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class='row g-4 mt-4'>
+                <div class='col-lg-6'>
+                    <div class='card p-4'>
+                        <div class='d-flex justify-content-between align-items-start gap-3'>
+                            <div>
+                                <h4>Recommandations de mentors</h4>
+                                <p class='text-muted'>Profils sélectionnés en fonction de votre parcours.</p>
+                            </div>
+                            <span class='badge badge-success'>Intelligent</span>
+                        </div>
+                        {% if recommended_mentors %}
+                        <div class='list-group mt-3'>
+                            {% for mentor in recommended_mentors %}
+                            <div class='list-group-item'>
+                                <div class='d-flex justify-content-between align-items-start gap-3'>
+                                    <div>
+                                        <h5 class='mb-1'>{{ mentor.user.username }}</h5>
+                                        <p class='small text-secondary mb-1'>{{ mentor.filiere }} • {{ mentor.get_role_display }}</p>
+                                        <p class='mb-1'>{{ mentor.bio|default:'Profil mentor disponible.' }}</p>
+                                    </div>
+                                    <div>
+                                        {% if mentor.star_display %}
+                                        <div class='complementarity-badge mb-1'>
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= mentor.star_display %}
+                                                    <span class='star filled'>★</span>
+                                                {% else %}
+                                                    <span class='star'>★</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <div class='small text-muted' style='font-size:0.7rem;'>Complémentarité</div>
+                                        {% else %}
+                                        <span class='badge badge-success'>{{ mentor.match_score }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class='mt-3 d-flex gap-2 flex-wrap'>
+                                    <a href='{% url "user_profile" mentor.user.username %}' class='btn btn-outline-secondary btn-sm'>Voir profil</a>
+                                    <a href='{% url "start_chat" mentor.user.id %}' class='btn btn-primary btn-sm'>Démarrer le chat</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class='text-muted mt-3'>Aucune recommandation disponible. Complète ton profil ou publie une annonce.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class='col-lg-6'>
+                    <div class='card p-4'>
+                        <div class='d-flex justify-content-between align-items-start gap-3'>
+                            <div>
+                                <h4>Annonces compatibles</h4>
+                                <p class='text-muted'>Correspondances basées sur vos compétences et besoins.</p>
+                            </div>
+                            <span class='badge badge-warning'>Nouveaux</span>
+                        </div>
+                        {% if recommended_posts %}
+                        <div class='list-group mt-3'>
+                            {% for post in recommended_posts %}
+                            <div class='list-group-item'>
+                                <div class='d-flex justify-content-between align-items-start mb-2'>
+                                    <div>
+                                        <h5 class='mb-1'>{{ post.title }}</h5>
+                                        <p class='small text-secondary mb-1'>{{ post.get_post_type_display }} • {{ post.get_mentorat_type_display }} • {{ post.filiere }}</p>
+                                        <p class='mb-1'>{{ post.description|truncatechars:120 }}</p>
+                                    </div>
+                                    <span class='badge badge-success'>{{ post.intelligent_match.score }}/100</span>
+                                </div>
+                                {% if post.intelligent_match %}
+                                <p class='small text-primary mb-1'>{{ post.intelligent_match.explanation }}</p>
+                                {% endif %}
+                                <p class='small text-secondary mt-2 mb-0'>{{ post.competences }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class='text-muted mt-3'>Aucune annonce compatible trouvée pour le moment.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class='row g-4 mt-4'>
+                <div class='col-lg-12'>
+                    <div class='card p-4'>
+                        <h4>Annonces récentes</h4>
+                        {% if recent_posts %}
+                        <div class='list-group mt-3'>
+                            {% for post in recent_posts %}
+                            <div class='list-group-item'>
+                                <div class='d-flex justify-content-between align-items-start mb-2'>
+                                    <div>
+                                        <h5 class='mb-1'>{{ post.title }}</h5>
+                                        <p class='small text-secondary mb-1'>{{ post.get_post_type_display }} • {{ post.get_mentorat_type_display }} • {{ post.filiere }}</p>
+                                        <p class='mb-1'>{{ post.description|truncatechars:100 }}</p>
+                                    </div>
+                                    <span class='badge badge-secondary'>Nouveau</span>
+                                </div>
+                                {% if post.intelligent_match %}
+                                <p class='small text-primary mb-1'>{{ post.intelligent_match.explanation }}</p>
+                                {% endif %}
+                                <p class='small text-secondary mt-2 mb-0'>{{ post.competences }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class='text-muted mt-3'>Aucune annonce récente pour le moment.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class='col-xl-4 dashboard-aside'>
+            <div class='card'>
+                <h4>Suivi rapide</h4>
+                <p class='text-muted'>Accédez à vos actions prioritaires et vos résultats du moment.</p>
+                <div class='metric-row mt-3'>
+                    <div class='metric-item'>
+                        <strong>{{ posts|length }}</strong>
+                        annonces publiées
+                    </div>
+                    <div class='metric-item'>
+                        <strong>{{ recommended_mentors|length }}</strong>
+                        mentors recommandés
+                    </div>
+                    <div class='metric-item'>
+                        <strong>{{ conversations|length }}</strong>
+                        conversations actives
+                    </div>
+                </div>
+            </div>
+            <div class='card'>
+                <h4>Prochaine session</h4>
+                <p class='text-muted'>Consulte ta messagerie ou planifie une nouvelle séance pour rester sur tes objectifs.</p>
+                <a href='{% url "conversations" %}' class='btn btn-secondary w-100 mt-3'>Voir la messagerie</a>
+            </div>
+            <div class='card'>
+                <h4>Besoins IFRI</h4>
+                <p class='text-muted'>Une sélection de ressources spécifiques à ton rythme et ton parcours IFRI.</p>
+                <ul class='list-unstyled mt-3'>
+                    <li class='mb-2'>• Conseils d’anciens pour mieux choisir ton projet.</li>
+                    <li class='mb-2'>• Astuces pour réussir les UEs les plus techniques.</li>
+                    <li class='mb-2'>• Checklist stage tech et insertion.</li>
+                    <li class='mb-2'>• Roadmaps de spécialité pour progresser sereinement.</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}

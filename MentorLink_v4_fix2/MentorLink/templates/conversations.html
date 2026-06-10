@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Conversations | IFRI MentorLink{% endblock %}
+{% block content %}
+<div class='conversation-list'>
+    <div class='conversation-header'>
+        <div>
+            <h3>Messagerie</h3>
+            <p class='text-muted'>Retrouve tes discussions et reprends facilement les conversations en cours.</p>
+        </div>
+        <div class='conversation-count badge bg-primary text-white'>{{ conversations|length }} ouvertes</div>
+    </div>
+
+    {% if conversations %}
+    <div class='conversation-cards'>
+        {% for item in conversations %}
+        <a href='{% url "conversation_detail" item.conversation.id %}' class='conversation-card'>
+            <div class='conversation-card-left'>
+                <div class='conversation-avatar'>{{ item.other.username|slice:":1"|upper }}</div>
+                <div>
+                    <strong>{{ item.other.username }}</strong>
+                    <div class='small text-muted'>{{ item.conversation.get_status_display }}</div>
+                </div>
+            </div>
+            <div class='conversation-card-right'>
+                {% if item.latest_message %}
+                <small class='text-muted'>{{ item.latest_message.body|truncatechars:48 }}</small>
+                {% else %}
+                <small class='text-muted'>Aucun message encore</small>
+                {% endif %}
+                <small class='conversation-timestamp'>{{ item.conversation.updated_at|date:'d/m/Y H:i' }}</small>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class='card p-4 shadow-sm'>
+        <p class='text-muted mb-0'>Aucune conversation pour l'instant. Lance une discussion depuis un profil mentor.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

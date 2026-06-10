@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Connexion | IFRI MentorLink{% endblock %}
+
+{% block extra_css %}
+<style>
+.login-page { max-width: 460px; margin: 60px auto; padding: 0 16px 60px; }
+.login-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 40px; box-shadow: var(--shadow);
+}
+.login-card h2 { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 28px; color: var(--text); }
+.login-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.login-field label { font-size: 13px; font-weight: 600; color: var(--text-soft); }
+.login-field input {
+    padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+    font-size: 14px; outline: none; background: var(--surface-soft); color: var(--text);
+    transition: border-color 0.2s, background 0.2s;
+}
+.login-field input:focus { border-color: var(--primary); background: var(--surface); }
+.login-link { text-align: center; margin-top: 18px; font-size: 13px; color: var(--text-muted); }
+.login-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
+.login-link a:hover { text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-card">
+        <h2>🔐 Connexion</h2>
+
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }} mb-3">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="login-field">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" required autocomplete="username" placeholder="votre_username">
+            </div>
+            <div class="login-field">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2 mt-1" style="font-size: 15px;">
+                Se connecter
+            </button>
+        </form>
+
+        <div class="login-link">
+            Pas encore inscrit ? <a href="{% url 'register' %}">Créer un compte</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

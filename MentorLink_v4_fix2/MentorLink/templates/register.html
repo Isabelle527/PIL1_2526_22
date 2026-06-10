@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}Inscription | IFRI MentorLink{% endblock %}
+
+{% block extra_css %}
+<style>
+.register-page { max-width: 720px; margin: 40px auto; padding: 0 16px 60px; }
+
+.register-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 40px; box-shadow: var(--shadow);
+}
+.register-card h2 {
+    text-align: center; color: var(--text); margin-bottom: 30px;
+    font-size: 1.6rem; font-weight: 700;
+}
+
+.form-row { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.form-group { display: flex; flex-direction: column; flex: 1; min-width: 200px; gap: 6px; }
+.form-group.full-width { flex-basis: 100%; }
+.form-group label { font-size: 13px; color: var(--text-soft); font-weight: 600; }
+.form-group input, .form-group select, .form-group textarea {
+    padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px;
+    font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;
+    background: var(--surface-soft); color: var(--text);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--primary); background: var(--surface);
+}
+.form-group textarea { resize: none; height: 80px; }
+.errorlist { color: #dc2626; font-size: 12px; list-style: none; padding: 0; margin: 2px 0 0; }
+
+/* Notes matières */
+.notes-section { margin: 24px 0 0; }
+.notes-section h4 { color: var(--text); font-size: 1rem; margin-bottom: 14px; font-weight: 700; }
+.matieres-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+@media (max-width: 500px) { .matieres-grid { grid-template-columns: 1fr; } }
+.matiere-item { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.matiere-item label { font-size: 12px; color: var(--text-muted); font-weight: 500; display: block; margin-bottom: 4px; }
+.slider-row { display: flex; align-items: center; gap: 8px; }
+.slider { flex: 1; accent-color: var(--primary); cursor: pointer; height: 4px; }
+.score-badge {
+    background: var(--surface-soft); color: var(--primary); font-weight: 700; font-size: 12px;
+    width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; border: 1.5px solid var(--primary);
+}
+
+.login-link { text-align: center; margin-top: 18px; font-size: 13px; color: var(--text-muted); }
+.login-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.login-link a:hover { text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-page">
+    <div class="register-card">
+        <h2>🎓 Créer votre compte</h2>
+
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }} mb-3">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" id="inscriptionForm">
+            {% csrf_token %}
+
+            <!-- Nom + Prénom -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_last_name">Nom *</label>
+                    {{ form.last_name }}
+                    {{ form.last_name.errors }}
+                </div>
+                <div class="form-group">
+                    <label for="id_first_name">Prénom *</label>
+                    {{ form.first_name }}
+                    {{ form.first_name.errors }}
+                </div>
+            </div>
+
+            <!-- Email + Téléphone -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_email">Adresse e-mail *</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+                <div class="form-group">
+                    <label for="id_telephone">Numéro de téléphone *</label>
+                    {{ form.telephone }}
+                    {{ form.telephone.errors }}
+                </div>
+            </div>
+
+            <!-- Username -->
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="id_username">Nom d'utilisateur *</label>
+                    {{ form.username }}
+                    {{ form.username.errors }}
+                </div>
+            </div>
+
+            <!-- Filière + Niveau -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_filiere">Filière *</label>
+                    {{ form.filiere }}
+                    {{ form.filiere.errors }}
+                </div>
+                <div class="form-group">
+                    <label for="id_niveau">Niveau *</label>
+                    {{ form.niveau }}
+                    {{ form.niveau.errors }}
+                </div>
+            </div>
+
+            <!-- Date de naissance -->
+            <div class="form-row">
+                <div class="form-group" style="max-width: 48%;">
+                    <label for="id_date_naissance">Date de naissance *</label>
+                    {{ form.date_naissance }}
+                    {{ form.date_naissance.errors }}
+                </div>
+            </div>
+
+            <!-- Notes sur 10 -->
+            <div class="notes-section">
+                <h4>Quel note vous donnez-vous sur 10 dans chaque matière ?</h4>
+                <div class="matieres-grid">
+                    {% for matiere in matieres %}
+                    <div class="matiere-item">
+                        <label>{{ matiere }}</label>
+                        <div class="slider-row">
+                            <input type="range" min="1" max="10" value="5" class="slider"
+                                   name="note_{{ matiere }}"
+                                   oninput="this.nextElementSibling.textContent = this.value">
+                            <span class="score-badge">5</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="form-row" style="margin-top: 24px;">
+                <div class="form-group">
+                    <label for="id_password1">Mot de passe *</label>
+                    {{ form.password1 }}
+                    {{ form.password1.errors }}
+                </div>
+                <div class="form-group">
+                    <label for="id_password2">Confirmer le mot de passe *</label>
+                    {{ form.password2 }}
+                    {{ form.password2.errors }}
+                </div>
+            </div>
+
+            <!-- Bio -->
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="id_bio">Bio courte (optionnel)</label>
+                    {{ form.bio }}
+                    {{ form.bio.errors }}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-3 mt-2" style="font-size: 16px;">
+                Créer mon compte
+            </button>
+
+            <div class="login-link">
+                Déjà un compte ? <a href="{% url 'login' %}">Se connecter</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
