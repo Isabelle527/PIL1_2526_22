@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - IFRI MentorLink</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header-top">
+        <button class="menu-burger-btn" id="openSidebarBtn" title="Ouvrir le menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="app-title-top">🎓 IFRI MentorLink</div>
+        <div style="width: 38px;"></div> </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebarMenu">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <span>🎓</span>
+                <span>MentorLink Menu</span>
+            </div>
+            <button class="btn-close-sidebar" id="closeSidebarBtn" title="Quitter">&times;</button>
+        </div>
+
+        <ul class="sidebar-menu-list">
+            <li class="sidebar-item active">
+                <a href="#">🏠 Tableau de bord</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="#">👤 Mon Profil</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="#">💬 Messagerie</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="#">🎯 Mon Matching</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="#">💼 Offres de mentorat</a>
+            </li>
+            
+            <li class="sidebar-divider"></li> <li class="sidebar-item">
+                <a href="#" class="logout-link">🚪 Déconnexion</a>
+            </li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        
+        <div class="welcome-card">
+            <div>
+                <h1 class="welcome-title">Ravi de vous revoir, <span>Enoch</span> 👋</h1>
+                <p class="welcome-text">Cliquez sur le menu en haut à gauche pour naviguer dans l'application.</p>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <div class="matching-section">
+                <h2 class="section-title">🎯 Vos suggestions de matching hybride</h2>
+                <div class="matching-list">
+                    <div class="profile-card">
+                        <div class="profile-info">
+                            <h3>Dr. Ablawa KPADONOU <span class="badge-match">94% Match</span></h3>
+                            <p class="profile-role">Enseignante - Chercheuse à l'IFRI</p>
+                            <p class="profile-specialties">Spécialités : Intelligence Artificielle, Data Science, Python</p>
+                        </div>
+                        <button class="btn-connect">Demander un mentorat</button>
+                    </div>
+
+                    <div class="profile-card">
+                        <div class="profile-info">
+                            <h3>M. Jean-Pierre HOUNDO <span class="badge-match">88% Match</span></h3>
+                            <p class="profile-role">Ingénieur DevOps / Ancien Étudiant</p>
+                            <p class="profile-specialties">Spécialités : Architecture Web, Flask, MySQL, Docker</p>
+                        </div>
+                        <button class="btn-connect">Demander un mentorat</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h2 class="section-title">📊 Suivi de vos demandes</h2>
+                <div class="sidebar-card">
+                    <div class="info-row">
+                        <span class="info-label">Mentors actifs</span>
+                        <span class="info-value">1</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Demandes en attente</span>
+                        <span class="info-value amber">1</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Prochaine session</span>
+                        <span class="info-value blue">Jeudi à 15h</span>
+                    </div>
+                </div>
+
+                <div class="tip-card">
+                    <h3>💡 Conseil du jour</h3>
+                    <p>N'hésitez pas à envoyer un message clair décrivant votre projet d'étude lors de votre première prise de contact avec un mentor.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const sidebar = document.getElementById('sidebarMenu');
+        const overlay = document.getElementById('sidebarOverlay');
+        const openBtn = document.getElementById('openSidebarBtn');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+
+        // Fonction pour ouvrir le menu
+        openBtn.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        });
+
+        // Fonction pour fermer le menu (Bouton Quitter / Croix)
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        // Fermer aussi le menu si on clique sur le fond sombre à côté
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, EmailStr
+from sqlalchemy import create_engine, Column, String, Integer
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+# Connexion PostgreSQL
+DATABASE_URL = "postgres+psycopg2://postgres:admin@localhost:5432/dondios"
+engine = create_engine(DATABASE_URL)
+Base = declarative_base()
+SessionLocal = sessionmaker(bind=engine)
+
+app = FastAPI(title="Pole Backend - Authentification")
+
+# Modèle table SQL
+class UtilisateurDB(Base):
+    __tablename__ = "utilisateurs"
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    nom         = Column(String(100))
+    prenom      = Column(String(100))
+    telephone   = Column(String(20), unique=True)
+    email       = Column(String(150), unique=True)
+    motdepasse  = Column(String(255))
+    pointfort   = Column(String(255))
+    pointfaible = Column(String(255))
+
+# Crée la table automatiquement au démarrage
+Base.metadata.create_all(engine)
+
+# Modèle Pydantic
+class InscriptionFormulaire(BaseModel):
+    nom: str
+    prenom: str
+    telephone: str
+    email: EmailStr
+    motdepasse: str
+    pointfort: str
+    pointfaible: str
+
+# Route inscription
+@app.post("/api/inscription", status_code=201)
+def inscrire_utilisateur(donnees: InscriptionFormulaire):
+    db = SessionLocal()
+
+    if db.query(UtilisateurDB).filter_by(telephone=donnees.telephone).first():
+        db.close()
+        raise HTTPException(status_code=400, detail="Ce téléphone existe déjà")
+
+    if db.query(UtilisateurDB).filter_by(email=donnees.email).first():
+        db.close()
+        raise HTTPException(status_code=400, detail="Cet email existe déjà")
+
+    nouvel_utilisateur = UtilisateurDB(**donnees.dict())
+    db.add(nouvel_utilisateur)
+    db.commit()
+    db.refresh(nouvel_utilisateur)
+    db.close()
+
+    return {"message": "Inscription réussie !", "id": nouvel_utilisateur.id}
